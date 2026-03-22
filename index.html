@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadFlow — Visual Workflow Automation | BlackRoad Labs</title>
+<meta name="description" content="Drag-and-drop workflow builder. Connect APIs, databases, AI models, and Pi fleet services. Self-hosted and sovereign alternative to n8n and Zapier.">
+<meta name="keywords" content="workflow automation, visual builder, n8n alternative, self-hosted, BlackRoad, RoadFlow, sovereign">
+<meta property="og:title" content="RoadFlow — Visual Workflow Automation">
+<meta property="og:description" content="Drag-and-drop workflows. Self-hosted. Sovereign. Your data never leaves your infrastructure.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gradient: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --card-border: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .gradient-line { height: 3px; background: var(--gradient); width: 100%; }
+
+  nav {
+    position: fixed; top: 3px; left: 0; right: 0; z-index: 1000;
+    background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--card-border);
+    padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+  .nav-logo {
+    width: 36px; height: 36px; background: var(--gradient); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; color: #000;
+  }
+  .nav-title { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text-primary); }
+  .nav-cta {
+    background: var(--gradient) !important; color: #000 !important;
+    padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600 !important;
+  }
+
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 8rem 2rem 4rem; position: relative;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(68,136,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(68,136,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px; pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 1rem; border: 1px solid var(--card-border);
+    border-radius: 100px; font-size: 0.8rem; color: var(--text-secondary);
+    margin-bottom: 2rem; font-family: var(--font-mono);
+  }
+  .hero-badge-dot { width: 8px; height: 8px; background: #00D4FF; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .hero h1 {
+    font-size: clamp(3rem,7vw,6rem); font-weight: 700; line-height: 1.05;
+    margin-bottom: 1.5rem; letter-spacing: -0.03em;
+  }
+  .gradient-text {
+    background: var(--gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero p { font-size: 1.25rem; color: var(--text-secondary); max-width: 640px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    background: var(--gradient); color: #000; padding: 0.85rem 2rem; border: none;
+    border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    text-decoration: none; font-family: var(--font-heading); transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,34,85,0.3); }
+  .btn-secondary {
+    background: transparent; color: var(--text-primary); padding: 0.85rem 2rem;
+    border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem;
+    font-weight: 500; cursor: pointer; text-decoration: none; transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: #444; }
+
+  .stats-bar {
+    display: flex; justify-content: center; gap: 4rem; margin-top: 5rem;
+    padding-top: 3rem; border-top: 1px solid var(--card-border); flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-value {
+    font-size: 2.5rem; font-weight: 700; font-family: var(--font-mono);
+    background: var(--gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  section { padding: 6rem 2rem; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; max-width: 700px; margin: 0 auto 4rem; }
+  .section-header h2 { font-size: 2.75rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; }
+  .section-header p { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 2rem; transition: border-color 0.3s;
+  }
+  .feature-card:hover { border-color: #333; }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, rgba(255,107,43,0.15), rgba(0,212,255,0.15));
+    border: 1px solid var(--card-border);
+  }
+  .feature-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .feature-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; }
+
+  /* Workflow visualization */
+  .workflow-section {
+    background: var(--surface);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .workflow-viz {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; flex-wrap: wrap; margin: 3rem 0;
+  }
+  .wf-node {
+    background: var(--bg); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 1.25rem 1.5rem; text-align: center;
+    min-width: 140px; transition: border-color 0.3s;
+  }
+  .wf-node:hover { border-color: #444; }
+  .wf-node-icon { font-size: 1.5rem; margin-bottom: 0.5rem; display: block; }
+  .wf-node-label { font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); }
+  .wf-arrow { color: var(--text-muted); font-size: 1.5rem; }
+
+  .wf-demo-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  }
+  .wf-demo-text h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1.25rem; letter-spacing: -0.02em; }
+  .wf-demo-text p { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem; }
+  .wf-demo-features { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+  .wf-demo-features li { display: flex; align-items: center; gap: 0.75rem; color: var(--text-secondary); font-size: 0.95rem; }
+  .wf-demo-features li::before { content: ''; width: 20px; height: 20px; background: var(--gradient); border-radius: 50%; flex-shrink: 0; }
+
+  /* Nodes catalog */
+  .nodes-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+  }
+  .node-card {
+    background: var(--surface); border: 1px solid var(--card-border);
+    border-radius: 10px; padding: 1.5rem; text-align: center; transition: border-color 0.3s;
+  }
+  .node-card:hover { border-color: #333; }
+  .node-card .emoji { font-size: 2rem; display: block; margin-bottom: 0.75rem; }
+  .node-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .node-card p { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Code block */
+  .code-block {
+    background: #0d0d0d; border: 1px solid var(--card-border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .code-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.02);
+  }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; background: #333; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #ffbd2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+  .code-body {
+    padding: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem;
+    line-height: 1.8; color: var(--text-secondary); overflow-x: auto;
+  }
+  .ck { color: #CC00AA; } .cf { color: #4488FF; } .cs { color: #00D4FF; }
+  .cc { color: #444; } .cn { color: #FF6B2B; } .ct { color: #FF2255; }
+
+  /* Comparison */
+  .comp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 900px; margin: 0 auto; }
+  .comp-card {
+    background: var(--surface); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 2rem; text-align: center;
+  }
+  .comp-card.featured { border-color: #FF2255; }
+  .comp-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .comp-card .price {
+    font-size: 2.5rem; font-weight: 700; font-family: var(--font-mono);
+    margin: 1rem 0 0.25rem;
+  }
+  .comp-card .price-note { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .comp-features { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; text-align: left; margin-bottom: 1.5rem; }
+  .comp-features li { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem; }
+  .comp-features li::before { content: '\2713'; color: #00D4FF; font-weight: 700; }
+
+  .pricing-btn {
+    display: block; width: 100%; text-align: center; padding: 0.75rem;
+    border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    transition: transform 0.2s;
+  }
+  .pricing-btn:hover { transform: translateY(-1px); }
+  .pbtn-primary { background: var(--gradient); color: #000; }
+  .pbtn-secondary { background: transparent; border: 1px solid var(--card-border); color: var(--text-primary); }
+
+  /* Self-hosted section */
+  .sovereign-section { background: var(--surface); border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); }
+  .sovereign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .sovereign-features { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  .sov-item {
+    background: var(--bg); border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 1.25rem; text-align: center;
+  }
+  .sov-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .sov-item p { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Use cases */
+  .usecases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+  .usecase-card {
+    background: var(--surface); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 2rem; transition: border-color 0.3s;
+  }
+  .usecase-card:hover { border-color: #333; }
+  .usecase-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .usecase-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+  .usecase-tag {
+    display: inline-block; margin-top: 0.75rem; padding: 0.2rem 0.6rem;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
+    border-radius: 4px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);
+  }
+
+  /* CTA */
+  .cta-section { padding: 8rem 2rem; text-align: center; position: relative; }
+  .cta-section::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(68,136,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section h2 { font-size: 3rem; font-weight: 700; margin-bottom: 1.25rem; letter-spacing: -0.02em; }
+  .cta-section p { color: var(--text-secondary); font-size: 1.15rem; max-width: 550px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+  footer { border-top: 1px solid var(--card-border); padding: 4rem 2rem 2rem; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; max-width: 1200px; margin: 0 auto; }
+  .footer-brand p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-top: 1rem; }
+  .footer-col h4 { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+  .footer-col a { display: block; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.5rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--text-primary); }
+  .footer-bottom {
+    max-width: 1200px; margin: 3rem auto 0; padding-top: 2rem;
+    border-top: 1px solid var(--card-border); display: flex; justify-content: space-between;
+    align-items: center; color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-mono);
+  }
+
+  @media (max-width: 768px) {
+    .wf-demo-grid, .sovereign-grid { grid-template-columns: 1fr; }
+    .comp-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .stats-bar { gap: 2rem; }
+    .sovereign-features { grid-template-columns: 1fr; }
+  }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: fadeInUp 0.6s ease-out forwards; }
+  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="gradient-line"></div>
+
+<nav>
+  <a href="#" class="nav-brand">
+    <div class="nav-logo">RF</div>
+    <span class="nav-title">RoadFlow</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#nodes">Nodes</a>
+    <a href="#sovereign">Self-Hosted</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://github.com/BlackRoad-Labs/roadflow">GitHub</a>
+    <a href="#cta" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge"><div class="hero-badge-dot"></div><span>BlackRoad Labs</span></div>
+  <h1 class="animate-in">Visual Workflow<br><span class="gradient-text">Automation</span></h1>
+  <p class="animate-in delay-1">
+    Drag-and-drop workflow builder that connects APIs, databases, AI models, and your
+    entire Pi fleet. Self-hosted, sovereign, and extensible. The n8n/Zapier alternative
+    that respects your data sovereignty. Runs on OverPass infrastructure.
+  </p>
+  <div class="hero-actions animate-in delay-2">
+    <a href="#cta" class="btn-primary">Build Your First Flow</a>
+    <a href="#features" class="btn-secondary">See How It Works</a>
+  </div>
+  <div class="stats-bar animate-in delay-3">
+    <div class="stat-item"><div class="stat-value">200+</div><div class="stat-label">Built-in Nodes</div></div>
+    <div class="stat-item"><div class="stat-value">0</div><div class="stat-label">Data Leaves Your Infra</div></div>
+    <div class="stat-item"><div class="stat-value">5min</div><div class="stat-label">Time to First Workflow</div></div>
+    <div class="stat-item"><div class="stat-value">24/7</div><div class="stat-label">Autonomous Execution</div></div>
+  </div>
+</section>
+
+<section class="workflow-section" style="padding: 6rem 2rem;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Build Flows <span class="gradient-text">Visually</span></h2>
+      <p>Connect triggers, actions, and conditions with a visual canvas. No code required for
+      80% of automations. Full JavaScript/Python support when you need it.</p>
+    </div>
+    <div class="workflow-viz">
+      <div class="wf-node"><span class="wf-node-icon">&#128276;</span><span class="wf-node-label">Webhook Trigger</span></div>
+      <span class="wf-arrow">&#8594;</span>
+      <div class="wf-node"><span class="wf-node-icon">&#129302;</span><span class="wf-node-label">AI Transform</span></div>
+      <span class="wf-arrow">&#8594;</span>
+      <div class="wf-node"><span class="wf-node-icon">&#128451;</span><span class="wf-node-label">Database Write</span></div>
+      <span class="wf-arrow">&#8594;</span>
+      <div class="wf-node"><span class="wf-node-icon">&#128233;</span><span class="wf-node-label">Notify Team</span></div>
+      <span class="wf-arrow">&#8594;</span>
+      <div class="wf-node"><span class="wf-node-icon">&#9989;</span><span class="wf-node-label">Log Result</span></div>
+    </div>
+    <div class="wf-demo-grid">
+      <div class="wf-demo-text">
+        <h2>Code When You<br><span class="gradient-text">Want To</span></h2>
+        <p>RoadFlow gives you the best of both worlds: visual drag-and-drop for quick automations,
+        and full code nodes for complex logic. Write JavaScript, Python, or shell scripts
+        directly in the flow editor.</p>
+        <ul class="wf-demo-features">
+          <li>Visual canvas with snap-to-grid alignment</li>
+          <li>JavaScript and Python code nodes</li>
+          <li>Conditional branching with boolean logic</li>
+          <li>Loop and iterator nodes for batch processing</li>
+          <li>Error handling with retry and fallback paths</li>
+          <li>Sub-workflow composition for reusable logic</li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div>
+        </div>
+        <div class="code-body">
+<pre><span class="cc">// RoadFlow — custom transform node</span>
+<span class="ck">export default</span> <span class="ck">async function</span> <span class="cf">transform</span>(input) {
+  <span class="cc">// Access upstream node data</span>
+  <span class="ck">const</span> records = input.<span class="cf">getAll</span>(<span class="cs">'webhook'</span>);
+
+  <span class="cc">// Call local Ollama model</span>
+  <span class="ck">const</span> enriched = <span class="ck">await</span> Promise.<span class="cf">all</span>(
+    records.<span class="cf">map</span>(<span class="ck">async</span> (record) => {
+      <span class="ck">const</span> summary = <span class="ck">await</span> <span class="cf">ollama</span>({
+        <span class="cf">model</span>: <span class="cs">'llama3'</span>,
+        <span class="cf">prompt</span>: <span class="cs">`Summarize: ${record.text}`</span>,
+      });
+      <span class="ck">return</span> { ...record, summary };
+    })
+  );
+
+  <span class="cc">// Pass to next node</span>
+  <span class="ck">return</span> enriched.<span class="cf">map</span>(item => ({
+    <span class="cf">json</span>: item,
+    <span class="cf">binary</span>: {},
+  }));
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="container">
+  <div class="section-header">
+    <h2>Built for <span class="gradient-text">Real Work</span></h2>
+    <p>RoadFlow isn't a toy. It's production infrastructure for automating complex
+    business processes, data pipelines, and AI workflows.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#128268;</div>
+      <h3>200+ Built-in Nodes</h3>
+      <p>HTTP, databases (PostgreSQL, SQLite, Redis), file systems, email, Slack, Discord,
+      Git operations, SSH commands, S3/MinIO, and more. Every node is fully configurable
+      with expression support for dynamic values.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#129302;</div>
+      <h3>AI-Native Nodes</h3>
+      <p>Connect to local Ollama models, OpenAI, Anthropic, or any OpenAI-compatible endpoint.
+      Embeddings, summarization, classification, extraction — all as drag-and-drop nodes.
+      Chain multiple AI calls with context passing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128337;</div>
+      <h3>Cron & Webhook Triggers</h3>
+      <p>Schedule workflows with cron expressions or trigger them via webhooks, file watchers,
+      email arrival, database changes, or MQTT messages. Every trigger supports filtering
+      and deduplication.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128736;</div>
+      <h3>Error Handling & Retry</h3>
+      <p>Built-in retry logic with exponential backoff. Dead letter queues for failed items.
+      Error branches let you define fallback behavior. Automatic alerting on workflow failures
+      via any notification channel.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128202;</div>
+      <h3>Execution History & Logs</h3>
+      <p>Every workflow execution is logged with full input/output data at each node.
+      Replay failed executions. Debug with step-through mode. Export execution data
+      for compliance and auditing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127760;</div>
+      <h3>Pi Fleet Integration</h3>
+      <p>Native support for BlackRoad Pi fleet services. SSH into any Pi, run commands,
+      collect sensor data, deploy services. RoadFlow treats your entire home lab as
+      a first-class automation target.</p>
+    </div>
+  </div>
+</section>
+
+<section id="nodes" class="container">
+  <div class="section-header">
+    <h2>Node <span class="gradient-text">Catalog</span></h2>
+    <p>A growing library of pre-built nodes for every integration you need.</p>
+  </div>
+  <div class="nodes-grid">
+    <div class="node-card"><span class="emoji">&#128451;</span><h4>PostgreSQL</h4><p>Query, insert, update</p></div>
+    <div class="node-card"><span class="emoji">&#128296;</span><h4>Redis</h4><p>Get, set, pub/sub</p></div>
+    <div class="node-card"><span class="emoji">&#128233;</span><h4>Email (SMTP)</h4><p>Send, receive, parse</p></div>
+    <div class="node-card"><span class="emoji">&#127760;</span><h4>HTTP Request</h4><p>REST, GraphQL, SOAP</p></div>
+    <div class="node-card"><span class="emoji">&#129302;</span><h4>Ollama</h4><p>Local AI inference</p></div>
+    <div class="node-card"><span class="emoji">&#128194;</span><h4>File System</h4><p>Read, write, watch</p></div>
+    <div class="node-card"><span class="emoji">&#128187;</span><h4>SSH</h4><p>Remote commands</p></div>
+    <div class="node-card"><span class="emoji">&#128225;</span><h4>MQTT</h4><p>IoT messaging</p></div>
+    <div class="node-card"><span class="emoji">&#128230;</span><h4>MinIO / S3</h4><p>Object storage</p></div>
+    <div class="node-card"><span class="emoji">&#128736;</span><h4>Git</h4><p>Clone, commit, push</p></div>
+    <div class="node-card"><span class="emoji">&#128276;</span><h4>Webhook</h4><p>Receive HTTP events</p></div>
+    <div class="node-card"><span class="emoji">&#128338;</span><h4>Cron</h4><p>Scheduled triggers</p></div>
+    <div class="node-card"><span class="emoji">&#128200;</span><h4>Grafana</h4><p>Dashboard queries</p></div>
+    <div class="node-card"><span class="emoji">&#128172;</span><h4>RoundTrip</h4><p>Agent messaging</p></div>
+    <div class="node-card"><span class="emoji">&#128736;</span><h4>Docker</h4><p>Container management</p></div>
+    <div class="node-card"><span class="emoji">&#128187;</span><h4>JavaScript</h4><p>Custom code</p></div>
+  </div>
+</section>
+
+<section id="sovereign" class="sovereign-section" style="padding: 6rem 2rem;">
+  <div class="container">
+    <div class="sovereign-grid">
+      <div>
+        <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1.25rem;">
+          Self-Hosted.<br><span class="gradient-text">Sovereign.</span>
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7; margin-bottom: 1rem;">
+          RoadFlow runs on your infrastructure. Your data never touches a third-party cloud.
+          Deploy on a Raspberry Pi, a VPS, or a Kubernetes cluster. Built on the OverPass
+          (n8n fork) engine, optimized for the BlackRoad sovereign stack.
+        </p>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7;">
+          Every workflow execution, every piece of data, every credential stays on machines
+          you control. That's not a feature — it's the architecture. RoadFlow was designed
+          from day one for teams that take data sovereignty seriously.
+        </p>
+      </div>
+      <div class="sovereign-features">
+        <div class="sov-item"><h4>Single Binary</h4><p>One binary, zero dependencies</p></div>
+        <div class="sov-item"><h4>ARM Support</h4><p>Runs on Raspberry Pi 4/5</p></div>
+        <div class="sov-item"><h4>SQLite Default</h4><p>No database server needed</p></div>
+        <div class="sov-item"><h4>Docker Ready</h4><p>One-line container deploy</p></div>
+        <div class="sov-item"><h4>WireGuard Mesh</h4><p>Secure inter-node comms</p></div>
+        <div class="sov-item"><h4>Full Encryption</h4><p>Credentials encrypted at rest</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="section-header">
+    <h2>Workflow <span class="gradient-text">Templates</span></h2>
+    <p>Start with battle-tested templates and customize them for your needs.</p>
+  </div>
+  <div class="usecases-grid">
+    <div class="usecase-card">
+      <h3>Data Pipeline</h3>
+      <p>Ingest data from multiple sources, transform with AI, load into PostgreSQL. Schedule
+      hourly with cron. Alert on failures via RoundTrip. Full idempotency and deduplication.</p>
+      <span class="usecase-tag">ETL</span> <span class="usecase-tag">PostgreSQL</span> <span class="usecase-tag">Cron</span>
+    </div>
+    <div class="usecase-card">
+      <h3>AI Content Pipeline</h3>
+      <p>Webhook receives content, Ollama summarizes and classifies, results stored in database,
+      team notified via email. Handles 1000+ items per hour on a single Pi.</p>
+      <span class="usecase-tag">Ollama</span> <span class="usecase-tag">Webhook</span> <span class="usecase-tag">Email</span>
+    </div>
+    <div class="usecase-card">
+      <h3>Infrastructure Monitor</h3>
+      <p>Every 5 minutes: SSH into each Pi, collect CPU/memory/disk, write to InfluxDB,
+      trigger alerts if thresholds exceeded. Self-healing actions for common issues.</p>
+      <span class="usecase-tag">SSH</span> <span class="usecase-tag">Cron</span> <span class="usecase-tag">InfluxDB</span>
+    </div>
+    <div class="usecase-card">
+      <h3>Git Deployment</h3>
+      <p>Webhook on push, pull latest code, run tests, build artifacts, deploy to target servers.
+      Rollback on failure. Post deployment status to team chat.</p>
+      <span class="usecase-tag">Git</span> <span class="usecase-tag">SSH</span> <span class="usecase-tag">Docker</span>
+    </div>
+    <div class="usecase-card">
+      <h3>Customer Onboarding</h3>
+      <p>Stripe webhook triggers flow: create database records, send welcome email,
+      provision service credentials, add to CRM, schedule follow-up tasks.</p>
+      <span class="usecase-tag">Stripe</span> <span class="usecase-tag">Email</span> <span class="usecase-tag">PostgreSQL</span>
+    </div>
+    <div class="usecase-card">
+      <h3>IoT Data Collection</h3>
+      <p>MQTT broker receives sensor data, RoadFlow normalizes and validates, stores in
+      time-series database, triggers alerts on anomalies, generates daily reports.</p>
+      <span class="usecase-tag">MQTT</span> <span class="usecase-tag">InfluxDB</span> <span class="usecase-tag">Grafana</span>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="container">
+  <div class="section-header">
+    <h2>Simple <span class="gradient-text">Pricing</span></h2>
+    <p>Start free with 5 workflows. Scale when you need to. Self-hosted means no per-execution charges.</p>
+  </div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <h3>Starter</h3>
+      <div class="price">Free</div>
+      <div class="price-note">forever</div>
+      <ul class="comp-features">
+        <li>5 active workflows</li>
+        <li>All built-in nodes</li>
+        <li>Cron & webhook triggers</li>
+        <li>Community support</li>
+        <li>Execution history (7 days)</li>
+      </ul>
+      <a href="#cta" class="pricing-btn pbtn-secondary">Start Free</a>
+    </div>
+    <div class="comp-card featured">
+      <h3>Pro</h3>
+      <div class="price">$19<span style="font-size:1rem;color:var(--text-muted);">/mo</span></div>
+      <div class="price-note">per instance</div>
+      <ul class="comp-features">
+        <li>Unlimited workflows</li>
+        <li>AI-native nodes (Ollama, etc.)</li>
+        <li>Sub-workflow composition</li>
+        <li>Priority support</li>
+        <li>Execution history (90 days)</li>
+        <li>Credential vault</li>
+        <li>Workflow versioning</li>
+      </ul>
+      <a href="#cta" class="pricing-btn pbtn-primary">Start Pro Trial</a>
+    </div>
+    <div class="comp-card">
+      <h3>Enterprise</h3>
+      <div class="price">$99<span style="font-size:1rem;color:var(--text-muted);">/mo</span></div>
+      <div class="price-note">per instance</div>
+      <ul class="comp-features">
+        <li>Everything in Pro</li>
+        <li>SSO / LDAP</li>
+        <li>Multi-instance clustering</li>
+        <li>Audit logs & compliance</li>
+        <li>Custom node development</li>
+        <li>Dedicated support engineer</li>
+        <li>SLA guarantee</li>
+      </ul>
+      <a href="#cta" class="pricing-btn pbtn-secondary">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<section id="cta" class="cta-section">
+  <h2>Automate <span class="gradient-text">Everything</span></h2>
+  <p>Stop paying per execution. Stop sending your data to someone else's cloud.
+  Build workflows that run on your terms.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-primary">Deploy RoadFlow</a>
+    <a href="https://github.com/BlackRoad-Labs/roadflow" class="btn-secondary">View on GitHub</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="nav-logo">RF</div>
+        <span class="nav-title">RoadFlow</span>
+      </div>
+      <p>Visual workflow automation built for sovereign infrastructure.
+      Self-hosted, extensible, and designed for teams that take data ownership seriously.
+      Built by BlackRoad Labs. Pave Tomorrow.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#nodes">Node Catalog</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Documentation</a>
+      <a href="#">Changelog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="#">Getting Started</a>
+      <a href="#">Workflow Templates</a>
+      <a href="#">Node SDK</a>
+      <a href="#">Community</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="https://blackroad.io">BlackRoad OS</a>
+      <a href="https://github.com/BlackRoad-Labs">BlackRoad Labs</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</span>
+    <span>roadflow.blackroad.io</span>
+  </div>
+</footer>
+</body>
+</html>
